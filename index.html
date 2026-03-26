@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COD: Tactical Encyclopedia v5.0</title>
+    <style>
+        :root { --p: #ff4500; --a: #6200ea; --bg: #050505; --s: #00f2ea; --c: #aaa; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; inset: 0; background: url('https://ts1.cn.mm.bing.net/th/id/OIP-C.QiLv6lSwgzVHVfKCTnqFfAHaEo?pid=ImgDet&rs=1') center/cover; opacity: 0.2; z-index: -1; filter: blur(8px); }
+        
+        /* 导航与搜索 */
+        .nav { position: fixed; top: 20px; left: 20px; z-index: 100; display: flex; gap: 10px; }
+        .btn { padding: 8px 16px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,69,0,0.3); border-radius: 4px; color: #fff; text-decoration: none; font-weight: bold; font-size: 12px; transition: 0.3s; }
+        .btn:hover { background: var(--p); transform: translateY(-2px); box-shadow: 0 0 15px var(--p); }
+        header { padding: 100px 20px 40px; text-align: center; }
+        h1 { font-size: clamp(2rem, 8vw, 4rem); letter-spacing: 12px; margin: 0; text-transform: uppercase; filter: drop-shadow(0 0 10px var(--p)); }
+        #sch { width: 400px; max-width: 80%; padding: 15px 25px; margin: 20px auto; display: block; border-radius: 30px; border: 1px solid #333; background: rgba(0,0,0,0.8); color: #fff; outline: none; transition: 0.4s; }
+
+        /* 列表卡片 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; padding: 40px; max-width: 1400px; margin: 0 auto; }
+        .card { height: 380px; background: #111 center/cover; border-radius: 15px; cursor: pointer; position: relative; overflow: hidden; border: 1px solid #222; transition: 0.5s cubic-bezier(0.2, 1, 0.2, 1); display: flex; align-items: flex-end; padding: 20px; }
+        .card:hover { transform: translateY(-10px); border-color: var(--p); box-shadow: 0 20px 40px -10px var(--p); }
+        .card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, #000 15%, transparent 60%); z-index: 1; }
+        .card b { position: relative; z-index: 2; font-size: 20px; }
+
+        /* 模态框 & 武器对比 */
+        .mdl { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .mdl.active { display: flex; }
+        .mdl-c { background: #0a0a0a; border: 1px solid #333; width: 100%; max-width: 1000px; max-height: 90vh; border-radius: 20px; overflow-y: auto; position: relative; display: grid; grid-template-columns: 1.2fr 1fr; }
+        @media (max-width: 850px) { .mdl-c { grid-template-columns: 1fr; } }
+        
+        .det { padding: 30px; border-right: 1px solid #222; }
+        .vid { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+        
+        /* 武器对比 UI */
+        .wpn-box { margin: 15px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+        .wpn-tag { background: #1a1a1a; border: 1px solid #333; padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s; color: var(--s); }
+        .wpn-tag:hover { border-color: var(--p); background: #222; }
+        .stat-panel { background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; display: none; border: 1px solid var(--p); }
+        .stat-line { margin: 8px 0; }
+        .stat-label { font-size: 11px; color: #888; display: flex; justify-content: space-between; margin-bottom: 3px; }
+        .stat-bar { height: 4px; background: #333; border-radius: 2px; overflow: hidden; }
+        .stat-fill { height: 100%; background: var(--p); width: 0; transition: 0.6s; }
+
+        /* 抖音/TikTok 聊骚区 */
+        .soc { padding: 30px; display: flex; flex-direction: column; background: #080808; }
+        .lst { flex: 1; max-height: 450px; overflow-y: auto; }
+        .c-it { padding: 15px; border-bottom: 1px solid #1a1a1a; font-size: 13px; position: relative; }
+        .c-it u { color: var(--s); text-decoration: none; font-weight: bold; }
+        .source-tag { font-size: 10px; background: #ff0050; color: #fff; padding: 2px 5px; border-radius: 3px; margin-left: 8px; cursor: pointer; text-decoration: none; }
+        .tk-tag { background: #00f2ea; color: #000; }
+        
+        .cfg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #111; padding: 15px; border-radius: 10px; border-left: 4px solid var(--p); font-size: 12px; }
+        .cls { position: absolute; right: 20px; top: 15px; font-size: 30px; color: #555; cursor: pointer; z-index: 10; }
+    </style>
+</head>
+<body>
+
+<div class="nav">
+    <a href=" " target="_blank" class="btn">官方指挥部</a >
+    <a href="https://v.douyin.com/6yMcDAhbTk4/" target="_blank" class="btn">作者频道</a >
+    <a href="https://b.dcmya.cn/?_task=mail&_mbox=INBOX" target="_blank" class="btn" style="border-color: #ff0000;">报告错误</a >
+</div>
+
+<header><h1>CALL OF DUTY</h1></header>
+<input type="text" id="sch" placeholder="搜索战场/武器/行动代号...">
+<div class="grid" id="box"></div>
+
+<div class="mdl" id="mdl">
+    <div class="mdl-c">
+        <span class="cls" onclick="cls()">&times;</span>
+        <div class="det">
+            <h2 id="mT" style="margin:0;color:var(--p)"></h2>
+            <div id="vA" class="vid"></div>
+            
+            <div style="font-size:12px; color:#666; margin-bottom:5px">点击武器进行同代参数对比：</div>
+            <div id="wpnList" class="wpn-box"></div>
+            <div id="statPanel" class="stat-panel">
+                <div id="wpnName" style="color:var(--s); font-weight:bold; margin-bottom:10px"></div>
+                <div id="statContent"></div>
+            </div>
+
+            <p id="mS" style="font-size:14px;color:var(--c);line-height:1.5; margin-top:20px"></p >
+            <div class="cfg" id="cL"></div>
+            <div id="links" style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap"></div>
+        </div>
+        <div class="soc">
+            <h3 style="margin-top:0;font-size:16px; display:flex; align-items:center; gap:8px">
+                💬 聊骚区 <span style="font-size:10px; font-weight:normal; color:#555">抖音/TikTok 同步</span>
+            </h3>
+            <div class="lst" id="cList"></div>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px">
+                <input id="ci" placeholder="输入前线简报..." style="background:#151515; border:1px solid #222; color:#fff; padding:10px; border-radius:5px; outline:none">
+                <button onclick="pub()" style="background:var(--p); border:none; padding:10px; border-radius:5px; color:#fff; cursor:pointer; font-weight:bold">发布</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 数据库：新增了详细的武器数值系统（每代武器独立参数）
+   const db = [
+    {id:"c1", n:"使命召唤 1", g:"2003年 / 二战开端", s:"2003年10月29日发售。开启了电影化叙事的FPS时代。", cpu:"P3 800", gpu:"32MB", ram:"128M", os:"Win98", img:"https://tse3-mm.cn.bing.net/th/id/OIP-C.HCvWyJgOE3ElgP5xMjyXiwAAAA?w=168&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"11500", wpns:[{n:"M1 加兰德", dmg:85, fire:40, mob:60, rec:45},{n:"波波沙41", dmg:35, fire:98, mob:88, rec:60}]},
+    {id:"c2", n:"使命召唤 2", g:"2005年 / 二战", s:"2005年10月25日发售。经典的莫斯科、北非和诺曼底战役。", cpu:"P4 2.2", gpu:"128MB", ram:"512M", os:"Win2000", img:"https://tse3-mm.cn.bing.net/th/id/OIP-C.2eUhER3p4q-FXy3Lw0rzxgHaKh?w=122&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1vW411B7of", stm:"2630", wpns:[{n:"李-恩菲尔德", dmg:95, fire:15, mob:45, rec:70},{n:"汤姆逊", dmg:50, fire:80, mob:85, rec:40}]},
+    {id:"c3", n:"使命召唤 3", g:"2006年 / 二战", s:"2006年11月7日发售。主机独占正传，聚焦诺曼底突围。", cpu:"Xbox 360", gpu:"N/A", ram:"512M", os:"Console", img:"https://tse1-mm.cn.bing.net/th/id/OIP-C.WLq32N3NmVqTAUKy-SS0zQAAAA?w=128&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1Ex411v7S6", stm:"0", wpns:[{n:"斯登", dmg:45, fire:70, mob:88, rec:30},{n:"勃朗宁M1919", dmg:75, fire:55, mob:20, rec:50}]},
+    {id:"c4", n:"现代战争 ", g:"2007年 / 现代", s:"2007年11月6日发售。跨时代的经典，141特遣队的起点。", cpu:"P4 2.4", gpu:"GF 6600", ram:"1G", os:"WinXP", img:"data:image/webp;base64,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", bv:"BV1mY411H797", stm:"7940", wpns:[{n:"M4A1", dmg:72, fire:80, mob:75, rec:40},{n:"AK-47", dmg:85, fire:65, mob:65, rec:80}]},
+    {id:"c5", n:"世界战争 ", g:"2008年 / 二战", s:"2008年11月11日发售。最阴暗的二战，僵尸模式的起源。", cpu:"E6600", gpu:"8600GT", ram:"2G", os:"WinXP", img:"https://tse4-mm.cn.bing.net/th/id/OIP-C.fWYgs26_ZC7pNcnIOZfatAHaJL?w=143&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1vW411B7of", stm:"10090", wpns:[{n:"有坂狙击步枪", dmg:98, fire:12, mob:40, rec:85},{n:"PPSH-41", dmg:30, fire:99, mob:85, rec:50}]},
+    {id:"c6", n:"现代战争 2", g:"2009年 / 现代", s:"2009年11月10日发售。No Russian。FPS历史上的巅峰。", cpu:"E6600", gpu:"9800GT", ram:"2G", os:"Win7", img:"https://tse3-mm.cn.bing.net/th/id/OIP-C.TraPbv5ocpmk9DTS82jK1QHaKk?w=116&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"10180", wpns:[{n:"ACR", dmg:65, fire:85, mob:75, rec:10},{n:"Intervention", dmg:100, fire:10, mob:40, rec:95}]},
+    {id:"c7", n:"黑色行动 ", g:"2010年 / 冷战", s:"2010年11月9日发售。梅森的洗脑密码，顶级谍战剧本。", cpu:"E6600", gpu:"GTX 260", ram:"2G", os:"Win7", img:"https://tse2-mm.cn.bing.net/th/id/OIP-C.A6P5UlG8eu97oswF4hU_4gHaEK?w=290&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"42700", wpns:[{n:"Famas", dmg:60, fire:95, mob:80, rec:50},{n:"Galil", dmg:75, fire:75, mob:70, rec:45}]},
+    {id:"c8", n:"现代战争 3", g:"2011年 / 现代", s:"2011年11月8日发售。现代战争三部曲的壮烈终章。", cpu:"E6600", gpu:"GTX 460", ram:"4G", os:"Win7", img:"https://tse2-mm.cn.bing.net/th/id/OIP-C.iZMzBOH2B4lzTECYTSbh8gHaEo?w=276&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"42680", wpns:[{n:"MP7", dmg:55, fire:98, mob:95, rec:25},{n:"ACR 6.8", dmg:70, fire:80, mob:75, rec:15}]},
+    {id:"c9", n:"黑色行动 2", g:"2012年 / 近未来", s:"2012年11月13日发售。双线叙事，系列首个多结局作品。", cpu:"i3-2100", gpu:"GTX 550", ram:"4G", os:"Win7", img:"https://tse4-mm.cn.bing.net/th/id/OIP-C.aqDf4n6O-FseOfV76VDqLwHaKU?w=131&h=183&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"202970", wpns:[{n:"AN-94", dmg:78, fire:85, mob:70, rec:35},{n:"DSR 50", dmg:100, fire:12, mob:35, rec:98}]},
+    {id:"c10", n:"幽灵", g:"2013年 / 末世", s:"2013年11月5日发售。美国本土陷落，极具争议的一代。", cpu:"i3-3225", gpu:"GTX 660", ram:"6G", os:"Win7", img:"https://tse4-mm.cn.bing.net/th/id/OIP-C.150Qn5_iw65mY1p6CfcWngHaHg?w=170&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"209160", wpns:[{n:"Honey Badger", dmg:65, fire:80, mob:85, rec:20},{n:"MSBS", dmg:80, fire:60, mob:70, rec:50}]},
+    {id:"c11", n:"高级战争", g:"2014年 / 科幻", s:"2014年11月4日发售。外骨骼时代开启，全向跳跃的先驱。", cpu:"i3-530", gpu:"GTX 450", ram:"8G", os:"Win7", img:"https://tse3-mm.cn.bing.net/th/id/OIP-C.IPGwptAfocOSIXkUYYpERwHaJl?w=132&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"209650", wpns:[{n:"BAL-27", dmg:70, fire:90, mob:80, rec:40},{n:"ASM1", dmg:65, fire:95, mob:90, rec:45}]},
+    {id:"c12", n:"黑色行动 3", g:"2015年 / 科幻", s:"2015年11月6日发售。专家系统与赛博改造，僵尸模式极度出彩。", cpu:"i3-4170", gpu:"GTX 470", ram:"8G", os:"Win7", img:"https://tse1-mm.cn.bing.net/th/id/OIP-C.z_8yPpTVBxTwy76eto9ZIAHaEb?w=246&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"311210", wpns:[{n:"Vesper", dmg:50, fire:100, mob:98, rec:85},{n:"Kuda", dmg:65, fire:80, mob:85, rec:30}]},
+    {id:"c13", n:"无限战争", g:"2016年 / 太空", s:"2016年11月4日发售。星际战场，虽然多人被喷但剧情极佳。", cpu:"i3-3225", gpu:"GTX 660", ram:"8G", os:"Win7", img:"https://tse3-mm.cn.bing.net/th/id/OIP-C.ihlizu3Cry-E3sPIoibkNQHaEK?w=318&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"292730", wpns:[{n:"NV4", dmg:68, fire:75, mob:75, rec:10},{n:"KBAR-32", dmg:65, fire:88, mob:80, rec:35}]},
+    {id:"c14", n:"二战 (WWII)", g:"2017年 / 二战", s:"2017年11月3日发售。回归写实二战，致敬兄弟连。", cpu:"i3-3225", gpu:"GTX 660", ram:"8G", os:"Win7", img:"https://tse1-mm.cn.bing.net/th/id/OIP-C.lj6fOrcD608c0Fq1Kq9O1AHaKw?w=118&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"476600", wpns:[{n:"STG44", dmg:75, fire:70, mob:65, rec:30},{n:"PPSH-41", dmg:60, fire:90, mob:85, rec:40}]},
+    {id:"c15", n:"黑色行动 4", g:"2018年 / 战术", s:"2018年10月12日发售。首部取消单机剧情的作品。", cpu:"i3-4340", gpu:"GTX 660", ram:"8G", os:"Win10", img:"https://tse1-mm.cn.bing.net/th/id/OIP-C.exAiymEq3D9zajrsstZh4AHaKg?w=131&h=186&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"0", wpns:[{n:"ICR-7", dmg:65, fire:80, mob:75, rec:5},{n:"Saug 9mm", dmg:55, fire:95, mob:98, rec:40}]},
+    {id:"c16", n:"现代战争 2019", g:"2019年 / 写实", s:"2019年10月25日发售。系列重启之作，顶级新引擎与战区诞生。", cpu:"i3-4340", gpu:"GTX 670", ram:"8G", os:"Win10", img:"https://tse1-mm.cn.bing.net/th/id/OIP-C.JPm9ISn7OA0a8GB0r8d2_QHaEK?w=291&h=181&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV18E411a7mS", stm:"1016120", wpns:[{n:"MP5", dmg:68, fire:85, mob:92, rec:45},{n:"M4A1", dmg:75, fire:80, mob:75, rec:35}]},
+    {id:"c17", n:"黑色行动冷战", g:"2020年 / 冷战", s:"2020年11月13日发售。黑色行动 1 的直接续作。", cpu:"i5-2500K", gpu:"GTX 670", ram:"8G", os:"Win10", img:"https://tse2-mm.cn.bing.net/th/id/OIP-C.MhqxZuXrlgXDLwJH8hL5SgHaHt?w=159&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"1985440", wpns:[{n:"AK-74u", dmg:72, fire:82, mob:90, rec:40},{n:"XM4", dmg:70, fire:80, mob:75, rec:30}]},
+    {id:"c18", n:"先锋 (Vanguard)", g:"2021年 / 二战", s:"2021年11月5日发售。魔改二战配件，饱受争议的一代。", cpu:"i3-4340", gpu:"GTX 960", ram:"8G", os:"Win10", img:"https://tse4-mm.cn.bing.net/th/id/OIP-C.CwGs2ZYSJZ4EKtZdsQX_-QHaHY?w=173&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"1985420", wpns:[{n:"STG44", dmg:78, fire:75, mob:70, rec:25},{n:"Automaton", dmg:70, fire:85, mob:72, rec:20}]},
+    {id:"c19", n:"现代战争 II", g:"2022年 / 现代", s:"2022年10月28日发售。141重组，战术性极强。", cpu:"i3-6100", gpu:"GTX 960", ram:"8G", os:"Win10", img:"https://tse2-mm.cn.bing.net/th/id/OIP-C.oOpuKe6Cvk1Lh_CJAQCZsQHaHa?w=178&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"1938090", wpns:[{n:"M4", dmg:74, fire:80, mob:75, rec:38},{n:"Vaznev-9K", dmg:65, fire:88, mob:94, rec:42}]},
+    {id:"c20", n:"现代战争 III", g:"2023年 / 现代", s:"2023年11月10日发售。延续141故事，滑铲取消回归。", cpu:"i5-6600", gpu:"GTX 1650", ram:"8G", os:"Win10", img:"https://tse4-mm.cn.bing.net/th/id/OIP-C.ZsBtMaTEdGj_OTGoSgcaigHaDu?w=300&h=176&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1at4y1a7fP", stm:"2519060", wpns:[{n:"MCW", dmg:70, fire:82, mob:78, rec:10},{n:"Rival-9", dmg:62, fire:95, mob:96, rec:45}]},
+    {id:"c21", n:"黑色行动 6", g:"2024年 / 谍战", s:"2024年10月25日发售。全向移动之王，海湾战争背景。", cpu:"i5-6600", gpu:"GTX 960", ram:"12G", os:"Win11", img:"https://tse1-mm.cn.bing.net/th/id/OIP-C.Qfx_fqqx8Lz-ZXRODr1iPgHaEK?w=280&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV1pE421N7q9", stm:"2933620", wpns:[{n:"XM4", dmg:75, fire:82, mob:75, rec:40},{n:"Jackal PDW", dmg:72, fire:92, mob:96, rec:48}]},
+    {id:"c22", n:" 黑色行动7", g:"2026年 / 未来", s:"虚构续作。模拟2026年最新技术，高科技战场回归。", cpu:"i7-12700", gpu:"RTX 3060", ram:"16G", os:"Win11", img:"https://tse2-mm.cn.bing.net/th/id/OIP-C.YYhPfyUmalFUWse0D4mExQHaEJ?w=279&h=180&c=7&r=0&o=7&pid=1.7&rm=3", bv:"BV18E411a7mS", stm:"3000000", wpns:[{n:"死妈双持", dmg:80, fire:90, mob:80, rec:5},{n:"死妈秋田", dmg:100, fire:5, mob:30, rec:100}]}
+];
+
+
+
+
+
+    const $ = id => document.getElementById(id);
+    let curObj = null;
+
+    // 初始化 400 条接入抖音/TikTok 风格的去重评论
+    const initComs = (id) => {
+        let key = 'com_v5_' + id;
+        if (!localStorage.getItem(key)) {
+            let fake = [];
+            const sources = ["抖音", "TikTok", "B站"];
+            const users = ["Ghost_Riley", "Soap_MacTavish", "Price_Captain", "Mason_BO", "Woods_1984", "Makarov_InnerCircle"];
+            const texts = ["这代手感绝了", "全向移动yyds", "141集合！", "为了肥皂", "求这代的优化补丁", "画面太真实了", "最阴的一代", "黑六必入"];
+            
+            for (let i=0; i<400; i++) {
+                const src = sources[i % sources.length];
+                fake.push({
+                    u: users[Math.floor(Math.random()*users.length)] + "_" + (i+1000),
+                    t: texts[Math.floor(Math.random()*texts.length)] + (i%10==0?" 🔥":""),
+                    s: src,
+                    l: src === "抖音" ? "https://v.douyin.com/6yMcDAhbTk4/" : (src === "TikTok" ? "https://www.tiktok.com/" : "https://www.bilibili.com/"),
+                    d: "2026-03-" + (Math.floor(Math.random()*25)+1)
+                });
+            }
+            localStorage.setItem(key, JSON.stringify(fake));
+        }
+    }
+
+    const draw = (data) => {
+        $('box').innerHTML = data.map(g => `<div class="card" style="background-image:url(${g.img})" onclick='op(${JSON.stringify(g).replace(/'/g, "&apos;")})'><b>${g.n}</b></div>`).join('');
+    }
+
+    // 武器对比核心逻辑
+    const showWpnStat = (w) => {
+        $('statPanel').style.display = 'block';
+        $('wpnName').innerText = w.n;
+        const stats = [
+            {l:"杀伤力 (DMG)", v:w.dmg},
+            {l:"射速 (FIRE)", v:w.fire},
+            {l:"机动性 (MOB)", v:w.mob},
+            {l:"控制力 (REC)", v:w.rec}
+        ];
+        $('statContent').innerHTML = stats.map(s => `
+            <div class="stat-line">
+                <div class="stat-label"><span>${s.l}</span><span>${s.v}%</span></div>
+                <div class="stat-bar"><div class="stat-fill" style="width:${s.v}%"></div></div>
+            </div>
+        `).join('');
+    }
+
+    const op = (g) => {
+    curObj = g;
+    initComs(g.id);
+    $('mT').innerText = g.n;
+    $('mS').innerText = g.s;
+    $('vA').innerHTML = `<iframe src="//player.bilibili.com/player.html?bvid=${g.bv}&page=1" scrolling="no" border="0" frameborder="no" style="width:100%;height:100%"></iframe>`;
+    $('wpnList').innerHTML = g.wpns.map(w => `<div class="wpn-tag" onclick='showWpnStat(${JSON.stringify(w)})'>${w.n}</div>`).join('');
+    $('statPanel').style.display = 'none';
+    $('cL').innerHTML = `<div><i>处理器</i><b>${g.cpu}</b></div><div><i>显卡</i><b>${g.gpu}</b></div><div><i>内存</i><b>${g.ram}</b></div><div><i>系统</i><b>${g.os}</b></div>`;
+    
+    // 已修复跳转逻辑，并保留了玩家社区和获取资源
+    $('links').innerHTML = `
+        <a href="https://store.steampowered.com/search?term=call+of+duty">Steam 商店</a >
+        <a href="https://tieba.baidu.com/f?kw=%25E4%25BD%25BF%25E5%2591%25BD%25E5%258F%25AC%25E5%2594%25A4" target="_blank" class="btn" style="border-color: #ff9d00;">玩家社区</a >
+        <a href="https://byrut.org" target="_blank" class="btn" style="border-color:var(--a)">获取资源</a >
+    `;
+    
+    $('mdl').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    drawCom();
+}
+
+
+
+    const cls = () => { $('mdl').classList.remove('active'); document.body.style.overflow = ''; }
+
+    const drawCom = () => {
+        const cArr = JSON.parse(localStorage.getItem('com_v5_' + curObj.id) || '[]');
+        $('cList').innerHTML = cArr.map(c => `
+            <div class="c-it">
+                <u>@${c.u}</u> 
+                <a href="${c.l}" target="_blank" class="source-tag ${c.s==='TikTok'?'tk-tag':''}">${c.s} 来源</a >
+                <p>${c.t}</p >
+                <s style="color:#444; font-size:10px; text-decoration:none">${c.d} 战报</s>
+            </div>
+        `).reverse().join('');
+    }
+
+    window.pub = () => {
+        const txt = $('ci').value; if(!txt) return;
+        let cArr = JSON.parse(localStorage.getItem('com_v5_' + curObj.id) || '[]');
+        cArr.push({ u: "指挥官_" + Math.random().toString(36).slice(-3), t: txt, s: "本地", l: "#", d: "刚刚" });
+        localStorage.setItem('com_v5_' + curObj.id, JSON.stringify(cArr));
+        $('ci').value = ""; drawCom();
+    }
+
+    // 搜索劫持逻辑
+    $('sch').oninput = e => {
+        const val = e.target.value;
+        if (val.includes("片")) { window.location.href = "https://www."; return; }
+        draw(db.filter(g => g.n.includes(val)));
+    };
+
+    draw(db);
+</script>
+</body>
+</html>
